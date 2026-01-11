@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineGraphX - Movies Data Manager (5k)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+
+    <div id="cinematic-bg">
+        <canvas id="bg-canvas"></canvas>
+        <div class="overlay"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-panel">
+        <div class="logo">CineGraphX <span class="accent">.Manager</span></div>
+        <ul class="nav-links">
+            <li class="active" data-target="home">Home</li>
+            <li data-target="avl">AVL (Titles/Rating)</li>
+            <li data-target="hash">Hash (Actor/Genre)</li>
+            <li data-target="graph">3D Graph</li>
+        </ul>
+        <div class="status-indicator">
+            <span class="dot"></span> Database Loading...
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="app-container">
+
+        <!-- Home -->
+        <section id="home" class="view active">
+            <div class="hero-content">
+                <h1 class="glitch" data-text="MOVIES DATA MANAGER">MOVIES DATA MANAGER</h1>
+                <p class="subtitle">5,000 Record Database | 3D Visualization | Real-Time Query</p>
+
+                <div class="menu-grid">
+                    <div class="menu-card" onclick="app.navigate('avl')">
+                        <div class="card-icon">🔍</div>
+                        <h3>Search & Rate</h3>
+                        <p>Binary Search by Title OR Filter by Rating Range.</p>
+                    </div>
+                    <div class="menu-card" onclick="app.navigate('hash')">
+                        <div class="card-icon">⚡</div>
+                        <h3>Index Filter</h3>
+                        <p>O(1) Lookup by Actor Name OR Genre Category.</p>
+                    </div>
+                    <div class="menu-card" onclick="app.navigate('graph')">
+                        <div class="card-icon">🕸️</div>
+                        <h3>3D Network</h3>
+                        <p>Interactive Cluster Visualization + Shortest Path Finder.</p>
+                    </div>
+                </div>
+
+                <div class="import-simulation">
+                    <button class="btn-primary" onclick="app.startImportSim()">
+                        <span class="icon">📂</span> Initialize 5,000 Records
+                    </button>
+                    <div id="import-progress" class="hidden">
+                        <div class="progress-bar">
+                            <div class="fill"></div>
+                        </div>
+                        <div class="log-console">
+                            <span class="log-line">> Allocating Memory...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AVL View -->
+        <section id="avl" class="view">
+            <div class="controls-bar glass-panel">
+                <h2>AVL Tree & Rating</h2>
+                <div class="controls">
+                    <div class="input-group">
+                        <input type="text" id="avl-input" placeholder="Title (e.g. Inception)"
+                            onkeypress="if(event.key==='Enter') avlVisualizer.search()">
+                        <button onclick="avlVisualizer.search()">Search Title</button>
+                    </div>
+                    <span class="divider">|</span>
+                    <div class="input-group">
+                        <input type="number" id="rating-min" placeholder="Min (0-10)" style="width: 80px;">
+                        <button onclick="avlVisualizer.filterRating()">Filter Rating</button>
+                    </div>
+                </div>
+            </div>
+            <div class="results-panel hidden" id="avl-results"></div>
+            <div id="avl-canvas-container" class="visualizer-container">
+                <!-- Tree -->
+            </div>
+        </section>
+
+        <!-- Hash View -->
+        <section id="hash" class="view">
+            <div class="controls-bar glass-panel">
+                <h2>Hash Filtering</h2>
+                <div class="controls">
+                    <div class="input-group">
+                        <input type="text" id="hash-input" placeholder="Actor Name..."
+                            onkeypress="if(event.key==='Enter') hashVisualizer.search()">
+                        <button onclick="hashVisualizer.search()">Filter Actor</button>
+                    </div>
+                    <span class="divider">|</span>
+                    <div class="input-group">
+                        <select id="genre-select"
+                            style="background:rgba(0,0,0,0.5); color:white; border:1px solid #444; padding:8px;">
+                            <option value="">Select Genre</option>
+                            <option value="Action">Action</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Sci-Fi">Sci-Fi</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Horror">Horror</option>
+                        </select>
+                        <button onclick="hashVisualizer.searchGenre()">Filter Genre</button>
+                    </div>
+                </div>
+            </div>
+            <div id="hash-canvas-container" class="visualizer-container">
+                <!-- Buckets -->
+            </div>
+        </section>
+
+        <!-- Graph View -->
+        <section id="graph" class="view">
+            <div class="controls-bar glass-panel">
+                <h2>3D Network</h2>
+                <div class="controls">
+                    <span class="label">Shortest Path:</span>
+                    <input type="text" id="graph-path-1" placeholder="Start Movie">
+                    <input type="text" id="graph-path-2" placeholder="End Movie">
+                    <button onclick="graphVisualizer.shortestPath()">Find Connection</button>
+                    <span class="divider">|</span>
+                    <button onclick="graphVisualizer.recommend()">Recommend</button>
+                </div>
+            </div>
+
+            <div class="split-view">
+                <div id="graph-canvas-container" class="visualizer-container 3d-container">
+                    <canvas id="graph-canvas"></canvas>
+                </div>
+                <!-- Linear Results Side Panel -->
+                <div id="graph-results-panel" class="glass-panel hidden">
+                    <h3>Results</h3>
+                    <ul id="graph-results-list"></ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Scripts -->
+    <script src="js/core/sound.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/core/visualizer.js"></script>
+    <script src="js/structures/avl.js"></script>
+    <script src="js/structures/hashtable.js"></script>
+    <script src="js/structures/graph.js"></script>
+    <script src="js/structures/list.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+
+</html>
